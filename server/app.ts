@@ -1,7 +1,6 @@
-import { readFileSync } from 'node:fs';
 import { Hono } from 'hono';
 import { basicAuth } from 'hono/basic-auth';
-import { serve } from '@hono/node-server';
+import { serveStatic } from '@hono/node-server/serve-static';
 import {
   createLink, deleteLink, getAnswers, getForm, getLink, latestFormId, listLinks, saveResponse,
 } from './db.ts';
@@ -15,7 +14,6 @@ if (!password) {
   process.exit(1);
 }
 
-const page = (name: string) => readFileSync(new URL(`../public/${name}`, import.meta.url), 'utf8');
 const TOKEN = /^[A-Za-z0-9_-]{8,64}$/;
 const MAX_BODY = 200_000;
 
@@ -23,7 +21,7 @@ const MAX_BODY = 200_000;
 // preso à versão que foi respondida, para o .md continuar fiel.
 const formIdFor = (link: LinkRow) => (link.submitted_at ? link.form_id : latestFormId());
 
-const app = new Hono();
+export const app = new Hono();
 
 app.use('*', async (c, next) => {
   await next();
@@ -34,19 +32,11 @@ app.use('*', async (c, next) => {
 
 /* ---------- público: formulário por link ---------- */
 
-app.get('/', (c) => c.text('Fratelli: use o link que você recebeu.', 404));
-
-app.get('/r/:token', (c) => {
+app.get('/api/r/:token', (c) => {
   const token = c.req.param('token');
   const link = TOKEN.test(token) ? getLink(token) : undefined;
-  if (!link) return c.text('Link inválido ou removido.', 404);
-
-  const boot = JSON.stringify({
-    token,
-    submitted: link.submitted_at !== null,
-    form: getForm(formIdFor(link)),
-  }).replace(/</g, '\\u003c');
-  return c.html(page('form.html').replace('__BOOT__', () => boot));
+  if (!link) return c.json({ error: 'Link inválido ou removido.' }, 404);
+  return c.json({ submitted: link.submitted_at !== null, form: getForm(formIdFor(link)) });
 });
 
 app.post('/api/r/:token', async (c) => {
@@ -69,14 +59,10 @@ app.post('/api/r/:token', async (c) => {
   return c.json({ ok: true });
 });
 
-/* ---------- backoffice (Basic Auth) ---------- */
+/* ---------- backoffice (Basic Auth na API) ---------- */
 
 const auth = basicAuth({ username: process.env.ADMIN_USER ?? 'admin', password });
-app.use('/admin', auth);
-app.use('/admin/*', auth);
 app.use('/api/admin/*', auth);
-
-app.get('/admin', (c) => c.html(page('admin.html')));
 
 const asciiSlug = (s: string) =>
   s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'resposta';
@@ -132,7 +118,11 @@ app.get('/api/admin/export.md', (c) => {
   return markdown(c, parts.join('\n---\n\n'), 'fratelli-todas-as-respostas');
 });
 
-const port = Number(process.env.PORT ?? 3000);
-serve({ fetch: app.fetch, port }, () => {
-  console.log(`Formulário/backoffice em http://localhost:${port}/admin`);
-});
+app.all('/api/*', (c) => c.json({ error: 'Não encontrado.' }, 404));
+
+/* ---------- front (build do Vite) ---------- */
+// Em produção o Node serve o dist/ e cai no index.html para as rotas do React (/r/:token, /admin).
+// Na Vercel esta parte é dispensável: os arquivos estáticos são servidos pela plataforma.
+
+app.use('/*', serveStatic({ root: './dist' }));
+app.get('*', serveStatic({ path: './dist/index.html' }));

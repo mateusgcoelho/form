@@ -2,33 +2,6 @@ import type { FormSchema } from './schema.ts';
 
 const CANAIS = ['Balcão / salão', 'Entrega própria', 'Retirada', 'WhatsApp', 'Cardápio online', 'iFood', 'Outros marketplaces', 'Telefone', 'Instagram'];
 
-const USA_HOJE = [
-  'Ainda uso o Gplus ToGo em paralelo',
-  'Saipos: PDV / gestão',
-  'Saipos: cardápio digital',
-  'Saipos: app de garçom',
-  'Saipos: gestão de entregas',
-  'Integração com iFood',
-  'Maquininha integrada',
-  'Planilha / caderno',
-  'Outro sistema',
-];
-
-const CARDAPIO_PROBLEMAS = [
-  'Visual feio / pouco personalizável',
-  'Lento ou instável',
-  'Difícil de montar pizza meio a meio',
-  'Bordas e adicionais complicados',
-  'Cliente se perde e desiste do pedido',
-  'Não aceita Pix / pagamento online direito',
-  'Taxa de entrega por bairro/raio ruim',
-  'Não avisa o cliente sobre o status',
-  'Sem cupom / fidelidade',
-  'Difícil de atualizar preços e sabores',
-  'Link / domínio fraco, sem a minha marca',
-  'Suporte demora a resolver',
-];
-
 const DORES = [
   { v: 'meio_a_meio', t: 'Pizza meio a meio e sabores', d: 'Montar 2 ou mais sabores, cobrar pelo maior valor, bordas e adicionais.' },
   { v: 'tamanhos', t: 'Tamanhos, bordas e preços', d: 'Preço diferente por tamanho, borda recheada, combos e promoções.' },
@@ -78,24 +51,6 @@ export const formSchema: FormSchema = {
       fields: [
         { type: 'chips', name: 'pedidos', label: 'Pedidos por dia (média)', hint: 'Escolha uma faixa.', single: true, options: ['Até 30', '30 a 60', '60 a 120', '120 a 250', 'Mais de 250'] },
         { type: 'chips', name: 'canais', label: 'Por onde chegam os pedidos hoje?', hint: 'Marque todos que usa.', options: CANAIS },
-      ],
-    },
-    {
-      key: 'hoje',
-      title: 'Como é hoje',
-      sub: 'Você saiu do Gplus ToGo e hoje usa o Saipos. Queremos saber o que funciona e, principalmente, o que não funciona no cardápio digital.',
-      fields: [
-        { type: 'chips', name: 'usaHoje', label: 'O que você usa no dia a dia?', options: USA_HOJE },
-        { type: 'scale', name: 'nota', label: 'De 0 a 10, o quanto o sistema atual (como um todo) resolve a sua operação?', min: 0, max: 10, low: 'Não resolve', high: 'Resolve tudo' },
-        { type: 'scale', name: 'notaCardapio', label: 'E só o cardápio digital do Saipos? De 0 a 10, o quanto você gosta dele?', min: 0, max: 10, low: 'Não gosto', high: 'Adoro' },
-        { type: 'select', name: 'comparaGplus', label: 'Comparado ao Gplus ToGo que você usava antes, o cardápio do Saipos é…', options: ['Muito pior', 'Um pouco pior', 'Parecido', 'Um pouco melhor', 'Muito melhor', 'Não cheguei a usar o Gplus ToGo'] },
-        { type: 'area', name: 'gplusSaudade', label: 'O que o Gplus ToGo fazia melhor e você sente falta?', placeholder: 'Ex.: montar meio a meio era mais simples, visual mais bonito…' },
-        { type: 'area', name: 'motivoMigracao', label: 'Por que decidiram sair do Gplus e ir para o Saipos?', placeholder: 'Ex.: preço, PDV, integração com iFood, suporte…' },
-        { type: 'chips', name: 'cardapioProblemas', label: 'O que não funciona no cardápio digital atual?', hint: 'Marque tudo que te incomoda.', options: CARDAPIO_PROBLEMAS },
-        { type: 'select', name: 'cardapioVendas', label: 'Quanto das vendas vem pelo cardápio digital hoje?', options: ['Quase nada', 'Até 20%', '20% a 50%', 'Mais de 50%'] },
-        { type: 'area', name: 'cardapioHistoria', label: 'Conte o que mais te frustra no cardápio digital deles', placeholder: 'Ex.: o cliente desiste na hora de escolher meio a meio e pede pelo WhatsApp…' },
-        { type: 'area', name: 'gosta', label: 'O que no sistema funciona bem e você não quer perder?', placeholder: 'Ex.: PDV, impressão na cozinha, integração com iFood…' },
-        { type: 'area', name: 'incomoda', label: 'Fora o cardápio, o que mais te irrita ou te faz perder tempo?', placeholder: 'Conte do jeito que fala com a equipe. Quanto mais real, melhor.' },
       ],
     },
     {
