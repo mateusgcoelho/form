@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Backoffice Fratelli</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.1.0"></script>
+
+<style>
+  :root {
+    color-scheme: light;
+    --background: #ffffff;
+    --foreground: #111118;
+    --muted: #f1f1f4;
+    --muted-foreground: #5d5d6a;
+    --card: #f6f6f8;
+    --border: rgb(17 17 24 / .10);
+    --input: rgb(17 17 24 / .045);
+    --primary: #d23a1f;
+    --primary-foreground: #ffffff;
+    --accent: #b02a12;
+    --accent-soft: #fde4de;
+    --ring: rgb(210 58 31 / .4);
+    --negative: #dc2626;
+    --positive: #047857;
+  }
+</style>
+
+<style type="text/tailwindcss">
+  @theme inline {
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+    --color-muted: var(--muted);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-card: var(--card);
+    --color-border: var(--border);
+    --color-input: var(--input);
+    --color-primary: var(--primary);
+    --color-primary-foreground: var(--primary-foreground);
+    --color-accent: var(--accent);
+    --color-accent-soft: var(--accent-soft);
+    --color-ring: var(--ring);
+    --color-negative: var(--negative);
+    --color-positive: var(--positive);
+    --font-sans: 'Geist', ui-sans-serif, system-ui, sans-serif;
+    --font-serif: 'Source Serif 4', ui-serif, Georgia, serif;
+    --radius-control: 0.7rem;
+    --radius-field: 1rem;
+    --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  @layer base {
+    *, ::before, ::after { border-color: var(--border); }
+    html { scroll-behavior: smooth; overflow-x: clip; }
+    body {
+      overflow-x: clip; background: var(--background); color: var(--foreground);
+      font-family: var(--font-sans); line-height: 1.6; letter-spacing: -0.006em;
+      -webkit-font-smoothing: antialiased; overflow-wrap: anywhere;
+    }
+    ::selection { background: var(--accent-soft); }
+  }
+  @utility display { font-family: var(--font-serif); font-weight: 600; letter-spacing: -0.02em; }
+  @utility focus-ring { &:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--ring); } }
+  @utility animate-row-in { animation: row-in .5s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+  @utility animate-swap-in { animation: swap-in .25s var(--ease-out) both; }
+  @keyframes row-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+  @keyframes swap-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) { .animate-row-in, .animate-swap-in { animation: none !important; } }
+</style>
+</head>
+
+<body class="min-h-dvh">
+<main class="mx-auto w-full max-w-3xl px-6 py-10 pb-24">
+
+  <header class="flex flex-wrap items-end justify-between gap-4">
+    <div>
+      <p class="text-[0.8125rem] font-medium text-muted-foreground">Backoffice</p>
+      <h1 class="display text-[clamp(1.75rem,1.2rem+2vw,2.5rem)] leading-[1.08]">Respostas da Fratelli</h1>
+    </div>
+    <a id="exportAll" href="/api/admin/export.md" download class="focus-ring group inline-flex h-11 items-center gap-2 rounded-control px-3.5 text-sm font-medium text-muted-foreground transition duration-150 hover:bg-muted hover:text-foreground sm:h-9">
+      <svg viewBox="0 0 24 24" class="size-4 transition-transform duration-200 ease-out group-hover:translate-y-0.5 motion-reduce:transition-none" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11m0 0-4-4m4 4 4-4M5 20h14"/></svg>
+      Baixar todas (.md)
+    </a>
+  </header>
+
+  <!-- novo link -->
+  <section class="mt-8 rounded-3xl bg-card p-5 min-[480px]:p-6">
+    <h2 class="text-sm font-semibold">Gerar link de resposta</h2>
+    <p class="mt-0.5 text-[0.8125rem] text-muted-foreground">Cada link aceita uma única resposta. Dê um nome para você reconhecer depois.</p>
+    <form id="newForm" class="mt-4 flex flex-col gap-3 sm:flex-row">
+      <input id="label" required maxlength="120" placeholder="Ex.: Dono, loja Centro" class="focus-ring block h-12 min-w-0 flex-1 rounded-field border border-transparent bg-background px-4 text-base transition duration-200 placeholder:text-muted-foreground/70 focus:border-primary/30">
+      <button class="focus-ring inline-flex h-12 items-center justify-center gap-2 rounded-control bg-primary px-[1.375rem] font-semibold text-primary-foreground transition duration-150 hover:opacity-[.88] active:scale-[.98] disabled:opacity-50">
+        <svg viewBox="0 0 24 24" class="size-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+        Gerar link
+      </button>
+    </form>
+    <p id="formError" role="alert" class="mt-3 hidden text-xs text-negative"></p>
+  </section>
+
+  <!-- lista -->
+  <section class="mt-8">
+    <div class="flex items-center justify-between">
+      <h2 class="text-sm font-semibold">Links</h2>
+      <span id="count" class="text-[0.8125rem] tabular-nums text-muted-foreground"></span>
+    </div>
+    <ul id="list" class="mt-3 flex flex-col gap-2.5"></ul>
+    <div id="empty" class="hidden rounded-3xl bg-card py-14 text-center">
+      <span class="mx-auto grid size-12 place-items-center rounded-full bg-background text-muted-foreground">
+        <svg viewBox="0 0 24 24" class="size-5" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg>
+      </span>
+      <p class="mt-4 font-semibold">Nenhum link ainda</p>
+      <p class="mt-1 text-sm text-muted-foreground">Gere o primeiro acima e envie para o cliente.</p>
+    </div>
+  </section>
+
+  <!-- visualização da resposta -->
+  <section id="viewer" class="mt-8 hidden rounded-3xl bg-card p-5 min-[480px]:p-6 animate-swap-in">
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <h2 id="viewerTitle" class="min-w-0 text-sm font-semibold"></h2>
+      <div class="flex items-center gap-1">
+        <button id="viewerCopy" class="focus-ring h-11 rounded-control px-3.5 text-sm font-medium text-muted-foreground transition duration-150 hover:bg-muted hover:text-foreground sm:h-9">Copiar .md</button>
+        <a id="viewerDl" class="focus-ring inline-flex h-11 items-center rounded-control px-3.5 text-sm font-medium text-muted-foreground transition duration-150 hover:bg-muted hover:text-foreground sm:h-9">Baixar .md</a>
+        <button id="viewerClose" aria-label="Fechar" class="focus-ring grid size-11 place-items-center sm:size-9 rounded-control text-muted-foreground transition duration-150 hover:bg-muted hover:text-foreground">
+          <svg viewBox="0 0 24 24" class="size-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+        </button>
+      </div>
+    </div>
+    <pre id="viewerMd" class="mt-4 max-h-[32rem] overflow-auto whitespace-pre-wrap rounded-field bg-background p-4 text-[0.8125rem] leading-[1.6]"></pre>
+  </section>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const fmt = iso => new Date(iso).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+const linkUrl = t => location.origin + '/r/' + t;
+
+const ICON = {
+  copy: '<rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M5 15V6.5A2.5 2.5 0 0 1 7.5 4H15"/>',
+  eye: '<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>',
+  dl: '<path d="M12 4v11m0 0-4-4m4 4 4-4M5 20h14"/>',
+  trash: '<path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/>'
+};
+const iconBtn = (attrs, icon, title, extra = '') =>
+  `<button ${attrs} title="${title}" aria-label="${title}" class="focus-ring group grid size-11 shrink-0 place-items-center sm:size-9 rounded-control text-muted-foreground transition duration-150 hover:bg-muted hover:text-foreground ${extra}"><svg viewBox="0 0 24 24" class="size-4 transition-transform duration-200 ease-out group-hover:-translate-y-0.5 group-hover:scale-110 motion-reduce:transition-none" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${icon}</svg></button>`;
+
+async function api(path, opts) {
+  const r = await fetch(path, opts);
+  const j = r.headers.get('content-type')?.includes('json') ? await r.json() : null;
+  if (!r.ok) throw new Error(j?.error || 'Erro ' + r.status);
+  return j;
+}
+
+let links = [];
+
+async function load() {
+  links = await api('/api/admin/links');
+  const answered = links.filter(l => l.submitted_at).length;
+  $('count').textContent = `${links.length} ${links.length === 1 ? 'link' : 'links'} · ${answered} ${answered === 1 ? 'resposta' : 'respostas'}`;
+  $('empty').classList.toggle('hidden', links.length > 0);
+  $('exportAll').classList.toggle('hidden', answered === 0);
+  $('list').innerHTML = links.map((l, i) => {
+    const done = !!l.submitted_at;
+    return `<li class="animate-row-in rounded-3xl bg-card p-4 min-[480px]:p-5" style="animation-delay:${i * 40}ms">
+      <div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
+        <div class="min-w-0">
+          <p class="font-semibold">${esc(l.label)}</p>
+          <p class="text-[0.8125rem] text-muted-foreground">${done ? 'Respondido em ' + fmt(l.submitted_at) : 'Criado em ' + fmt(l.created_at)}</p>
+        </div>
+        <span class="rounded-md px-1.5 py-0.5 text-xs font-medium ${done ? 'bg-positive/10 text-positive' : 'bg-muted text-muted-foreground'}">${done ? 'Respondido' : 'Pendente'}</span>
+      </div>
+      <div class="mt-3 flex items-center gap-1">
+        <button data-copy="${esc(l.token)}" class="focus-ring group inline-flex h-11 min-w-0 flex-1 items-center gap-2 rounded-control bg-background px-3 text-left sm:h-9 text-[0.8125rem] text-muted-foreground transition duration-150 hover:text-foreground">
+          <svg viewBox="0 0 24 24" class="size-4 shrink-0 transition-transform duration-200 group-hover:scale-110" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON.copy}</svg>
+          <span class="truncate" data-copy-label>${esc(linkUrl(l.token))}</span>
+        </button>
+        ${done ? iconBtn(`data-view="${esc(l.token)}"`, ICON.eye, 'Ver respostas') + `<a href="/api/admin/links/${encodeURIComponent(l.token)}/response.md" download title="Baixar .md" aria-label="Baixar .md" class="focus-ring group grid size-11 shrink-0 place-items-center sm:size-9 rounded-control text-muted-foreground transition duration-150 hover:bg-muted hover:text-foreground"><svg viewBox="0 0 24 24" class="size-4 transition-transform duration-200 ease-out group-hover:translate-y-0.5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON.dl}</svg></a>` : ''}
+        ${iconBtn(`data-del="${esc(l.token)}"`, ICON.trash, 'Excluir link', 'hover:!text-negative')}
+      </div>
+    </li>`;
+  }).join('');
+}
+
+async function copy(text) {
+  try { await navigator.clipboard.writeText(text); return true; }
+  catch { const a = document.createElement('textarea'); a.value = text; document.body.appendChild(a); a.select(); const ok = document.execCommand('copy'); a.remove(); return ok; }
+}
+
+$('newForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const err = $('formError'); err.classList.add('hidden');
+  const btn = e.submitter ?? e.target.querySelector('button'); btn.disabled = true;
+  try {
+    const l = await api('/api/admin/links', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ label: $('label').value }) });
+    $('label').value = '';
+    await copy(linkUrl(l.token));
+    await load();
+    const first = document.querySelector('[data-copy-label]');
+    if (first) { first.textContent = 'Link copiado!'; setTimeout(() => first.textContent = linkUrl(l.token), 2000); }
+  } catch (x) { err.textContent = x.message; err.classList.remove('hidden'); }
+  finally { btn.disabled = false; }
+});
+
+let viewing = null;
+$('list').addEventListener('click', async e => {
+  const b = e.target.closest('button'); if (!b) return;
+  if (b.dataset.copy) {
+    await copy(linkUrl(b.dataset.copy));
+    const s = b.querySelector('[data-copy-label]'); s.textContent = 'Link copiado!';
+    setTimeout(() => s.textContent = linkUrl(b.dataset.copy), 2000);
+  } else if (b.dataset.view) {
+    const t = b.dataset.view;
+    try {
+      const { md } = await api(`/api/admin/links/${encodeURIComponent(t)}/response`);
+      viewing = md;
+      $('viewerTitle').textContent = links.find(l => l.token === t)?.label ?? 'Resposta';
+      $('viewerMd').textContent = md;
+      $('viewerDl').href = `/api/admin/links/${encodeURIComponent(t)}/response.md`;
+      $('viewerDl').setAttribute('download', '');
+      $('viewer').classList.remove('hidden');
+      $('viewer').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } catch (x) { alert(x.message); }
+  } else if (b.dataset.del) {
+    const l = links.find(x => x.token === b.dataset.del);
+    const msg = l.submitted_at ? `Excluir "${l.label}" e a resposta recebida? Isso não pode ser desfeito.` : `Excluir o link "${l.label}"?`;
+    if (!confirm(msg)) return;
+    try { await api('/api/admin/links/' + encodeURIComponent(l.token), { method: 'DELETE' }); $('viewer').classList.add('hidden'); await load(); }
+    catch (x) { alert(x.message); }
+  }
+});
+
+$('viewerClose').addEventListener('click', () => $('viewer').classList.add('hidden'));
+$('viewerCopy').addEventListener('click', async () => {
+  await copy(viewing ?? ''); $('viewerCopy').textContent = 'Copiado!';
+  setTimeout(() => $('viewerCopy').textContent = 'Copiar .md', 2000);
+});
+
+load().catch(x => { $('count').textContent = x.message; });
+</script>
+</body>
+</html>
