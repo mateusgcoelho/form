@@ -1,5 +1,7 @@
-import type { Answers, Field } from '../server/schema.ts';
-import { Check, ChevronDown, cx } from './ui.tsx';
+'use client';
+
+import type { Answers, Field } from '@/lib/schema';
+import { Check, ChevronDown, cx } from './ui';
 
 export type Ctx = {
   answers: Answers;

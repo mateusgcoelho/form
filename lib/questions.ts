@@ -1,4 +1,4 @@
-import type { FormSchema } from './schema.ts';
+import type { FormSchema } from './schema';
 
 const CANAIS = ['Balcão / salão', 'Entrega própria', 'Retirada', 'WhatsApp', 'Cardápio online', 'iFood', 'Outros marketplaces', 'Telefone', 'Instagram'];
 

@@ -1,5 +1,5 @@
-import { flatten, isEmpty } from './schema.ts';
-import type { Answers, FormSchema, Leaf } from './schema.ts';
+import { flatten, isEmpty } from './schema';
+import type { Answers, FormSchema, Leaf } from './schema';
 
 const DASH = 'Sem resposta';
 

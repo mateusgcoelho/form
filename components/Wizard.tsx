@@ -1,50 +1,15 @@
+'use client';
+
 import { useEffect, useRef, useState } from 'react';
 import type { CSSProperties, FormEvent } from 'react';
-import { flatten, isEmpty } from '../server/schema.ts';
-import type { Answers, FormSchema } from '../server/schema.ts';
-import { api, ApiError } from './api.ts';
-import { FieldView } from './Fields.tsx';
-import { CheckBig, ChevronLeft, ChevronRight, Skeleton, cx } from './ui.tsx';
-
-type Boot = { submitted: boolean; form: FormSchema };
+import { flatten, isEmpty } from '@/lib/schema';
+import type { Answers, FormSchema } from '@/lib/schema';
+import { api, ApiError } from '@/lib/api';
+import { FieldView } from './Fields';
+import { CheckBig, ChevronLeft, ChevronRight, cx } from './ui';
 
 const delay = (i: number) => ({ '--i': i }) as CSSProperties;
 const reduceMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-export default function FormPage({ token }: { token: string }) {
-  const [boot, setBoot] = useState<Boot | null>(null);
-  const [error, setError] = useState('');
-
-  useEffect(() => {
-    api<Boot>(`/api/r/${encodeURIComponent(token)}`)
-      .then((b) => {
-        document.title = `Diagnóstico ${b.form.brand}`;
-        setBoot(b);
-      })
-      .catch((e) => setError(e instanceof ApiError && e.status === 404 ? 'Link inválido ou removido.' : 'Não foi possível carregar o formulário. Tente de novo.'));
-  }, [token]);
-
-  if (error) {
-    return (
-      <main className="mx-auto grid min-h-dvh w-full max-w-3xl place-items-center px-4 text-center">
-        <p className="text-muted-foreground">{error}</p>
-      </main>
-    );
-  }
-
-  if (!boot) {
-    return (
-      <main className="mx-auto w-full max-w-3xl px-4 pt-12 sm:px-6" role="status" aria-busy="true">
-        <Skeleton className="h-12 w-4/5" />
-        <Skeleton className="mt-3 h-12 w-3/5" />
-        <Skeleton className="mt-8 h-5 w-full" />
-        <Skeleton className="mt-2 h-5 w-2/3" />
-      </main>
-    );
-  }
-
-  return <Wizard token={token} form={boot.form} alreadyAnswered={boot.submitted} />;
-}
 
 type Phase = 'edit' | 'sending' | 'done' | 'already';
 
@@ -57,7 +22,7 @@ function loadDraft(key: string, lastStep: number): { answers: Answers; step: num
   }
 }
 
-function Wizard({ token, form, alreadyAnswered }: { token: string; form: FormSchema; alreadyAnswered: boolean }) {
+export default function Wizard({ token, form, alreadyAnswered }: { token: string; form: FormSchema; alreadyAnswered: boolean }) {
   const KEY = `draft:${token}`;
   const last = form.steps.length - 1;
 

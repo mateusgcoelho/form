@@ -1,7 +1,9 @@
+'use client';
+
 import { useCallback, useEffect, useState } from 'react';
 import type { FormEvent, ReactNode } from 'react';
-import { api, copyText } from './api.ts';
-import { Close, Copy, Download, Eye, LinkIcon, Plus, Trash, cx } from './ui.tsx';
+import { api, copyText } from '@/lib/api';
+import { Close, Copy, Download, Eye, LinkIcon, Plus, Trash, cx } from './ui';
 
 type Link = {
   token: string;
@@ -12,7 +14,7 @@ type Link = {
 
 const fmt = (iso: string) => new Date(iso).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
 const linkUrl = (t: string) => `${location.origin}/r/${t}`;
-const mdUrl = (t: string) => `/api/admin/links/${encodeURIComponent(t)}/response.md`;
+const mdUrl = (t: string) => `/api/admin/links/${encodeURIComponent(t)}/markdown`;
 
 const iconBtn =
   'focus-ring group grid size-11 shrink-0 place-items-center rounded-control text-muted-foreground transition duration-150 hover:bg-muted hover:text-foreground sm:size-9';
@@ -29,8 +31,6 @@ export default function AdminPage() {
   const [copied, setCopied] = useState<string | null>(null);
   const [viewer, setViewer] = useState<{ title: string; md: string; token: string } | null>(null);
   const [viewerCopied, setViewerCopied] = useState(false);
-
-  useEffect(() => { document.title = 'Backoffice Fratelli'; }, []);
 
   const load = useCallback(async () => {
     try {
@@ -101,7 +101,7 @@ export default function AdminPage() {
           <h1 className="display text-[clamp(1.75rem,1.2rem+2vw,2.5rem)] leading-[1.08]">Respostas da Fratelli</h1>
         </div>
         {answered > 0 && (
-          <a href="/api/admin/export.md" download className={cx(textBtn, 'group gap-2')}>
+          <a href="/api/admin/export" download className={cx(textBtn, 'group gap-2')}>
             <Download className="size-4 transition-transform duration-200 ease-out group-hover:translate-y-0.5 motion-reduce:transition-none" />
             Baixar todas (.md)
           </a>
