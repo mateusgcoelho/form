@@ -103,7 +103,7 @@ export const formSchema: FormSchema = {
       title: 'Suas maiores dores',
       sub: 'Marque tudo que acontece na sua pizzaria. Depois escolhemos o que mais pesa.',
       fields: [
-        { type: 'cards', name: 'dores', label: 'Dores marcadas', hint: 'Marque quantas quiser', required: true, options: DORES, rank: { name: 'doresTop', label: 'As 3 que mais machucam', max: 3 } },
+        { type: 'cards', name: 'dores', label: 'Quais dessas dores acontecem na Fratelli?', hint: 'Marque quantas quiser.', required: true, options: DORES, rank: { name: 'doresTop', label: 'As 3 que mais machucam', max: 3 } },
         {
           type: 'pair',
           fields: [
@@ -119,7 +119,7 @@ export const formSchema: FormSchema = {
       title: 'O que você precisa de verdade',
       sub: 'Esqueça funções bonitas. O que faria diferença no caixa e na sua rotina?',
       fields: [
-        { type: 'cards', name: 'precisa', label: 'Essenciais', hint: 'Marque o que seria essencial', required: true, options: PRECISA, rank: { name: 'precisaTop', label: 'O mais importante, em ordem', max: 3 } },
+        { type: 'cards', name: 'precisa', label: 'O que seria essencial para a Fratelli?', hint: 'Marque tudo que faria diferença.', required: true, options: PRECISA, rank: { name: 'precisaTop', label: 'O mais importante, em ordem', max: 6 } },
         { type: 'area', name: 'mudaria', label: 'Se pudesse mudar uma única coisa amanhã, o que seria?', placeholder: 'Uma frase já basta.' },
         { type: 'area', name: 'naoAceita', label: 'Algo que um novo sistema NÃO pode ter?', placeholder: 'Ex.: ser complicado, exigir contrato longo, trocar de maquininha…' },
       ],
@@ -133,7 +133,7 @@ export const formSchema: FormSchema = {
           type: 'pair',
           fields: [
             { type: 'select', name: 'urgencia', label: 'Qual a urgência?', options: ['Preciso resolver já', 'Nos próximos 3 meses', 'Estou só pesquisando'] },
-            { type: 'select', name: 'investimento', label: 'Quanto pensa em investir por mês?', options: ['Quero o menor custo possível', 'Até R$ 200', 'R$ 200 a R$ 500', 'R$ 500 a R$ 1.000', 'Depende do resultado'] },
+            { type: 'select', name: 'investimento', label: 'Quanto pensa em investir por mês?', options: ['Até R$ 200', 'R$ 200 a R$ 500', 'R$ 500 a R$ 1.000', 'Depende do resultado'] },
           ],
         },
         { type: 'select', name: 'decisor', label: 'Quem decide a troca?', options: ['Eu mesmo(a)', 'Eu e sócio(a)', 'Outra pessoa'] },

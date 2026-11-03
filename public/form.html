@@ -99,11 +99,6 @@
 
 <body class="min-h-dvh">
 
-<header class="mx-auto flex w-full max-w-3xl items-center justify-between px-4 pt-5 sm:px-6 sm:pt-6">
-  <span id="brand" class="text-sm font-semibold tracking-[-0.006em]"></span>
-  <span id="timeHint" class="text-[0.8125rem] text-muted-foreground">≈ 4 minutos</span>
-</header>
-
 <main class="mx-auto w-full max-w-3xl px-4 pb-36 sm:px-6">
 
   <section id="hero" class="pt-[clamp(1.75rem,6vh,4.5rem)] pb-6 sm:pb-10">
@@ -175,6 +170,10 @@ const toggle = (a, v, max) => { a = [...a]; const i = a.indexOf(v); if (i > -1) 
 const CHECK = '<svg viewBox="0 0 24 24" class="size-3.5" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>';
 const inputCls = 'focus-ring block w-full rounded-field border border-transparent bg-input px-4 text-base transition duration-200 ease-out placeholder:text-muted-foreground/70 focus:border-primary/30 focus:bg-background aria-[invalid=true]:border-negative/50';
 const lbl = f => `<label for="${esc(f.name)}" class="mb-2 block text-sm font-medium tracking-[-0.006em]">${esc(f.label)}${f.required ? ' <span class="text-accent" aria-hidden="true">*</span>' : ''}</label>`;
+// Enunciado fixo logo abaixo da barra de progresso: ao rolar listas longas, a pergunta continua visível
+const STICKY = 'sticky top-[3.75rem] z-10 -mx-4 bg-background/95 px-4 py-2 backdrop-blur sm:-mx-6 sm:px-6';
+const head = (label, required, hint) =>
+  `<div class="${STICKY}"><p class="text-sm font-medium tracking-[-0.006em]">${esc(label)}${required ? ' <span class="text-accent" aria-hidden="true">*</span>' : ''}</p>${hint ? `<p class="mt-0.5 text-[0.8125rem] text-muted-foreground">${esc(hint)}</p>` : ''}</div>`;
 const pill = on => on ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-background text-muted-foreground hover:border-foreground/25';
 
 /* ============ estado + rascunho local ============ */
@@ -209,7 +208,7 @@ function renderField(f) {
     case 'chips': {
       const sel = arr(v);
       const c = f.options.map(o => `<button type="button" data-chip="${esc(f.name)}" ${f.single ? 'data-single="1"' : ''} data-value="${esc(o)}" aria-pressed="${sel.includes(o)}" class="focus-ring h-10 rounded-full border px-4 text-sm font-medium transition duration-150 active:scale-95 sm:h-8 sm:px-3 ${pill(sel.includes(o))}">${esc(o)}</button>`).join('');
-      return `<div><p class="text-sm font-medium tracking-[-0.006em]">${esc(f.label)}${f.required ? ' <span class="text-accent" aria-hidden="true">*</span>' : ''}</p>${f.hint ? `<p class="mt-0.5 text-[0.8125rem] text-muted-foreground">${esc(f.hint)}</p>` : ''}<div class="mt-3 flex flex-wrap gap-2">${c}</div></div>`;
+      return `<div>${head(f.label, f.required, f.hint)}<div class="mt-2 flex flex-wrap gap-2">${c}</div></div>`;
     }
 
     case 'scale': {
@@ -231,7 +230,7 @@ function renderField(f) {
           <span class="min-w-0"><span class="block text-sm ${on ? 'font-semibold text-accent' : 'font-medium'}">${esc(o.t)}</span><span class="mt-0.5 block text-[0.8125rem] leading-[1.45] text-muted-foreground">${esc(o.d)}</span></span>
         </button>`;
       }).join('');
-      let html = `<div><p class="mb-3 text-[0.8125rem] text-muted-foreground">${esc(f.hint)}</p><div class="grid grid-cols-1 gap-2.5 sm:grid-cols-2">${c}</div></div>`;
+      let html = `<div>${head(f.label, f.required, f.hint)}<div class="mt-2 grid grid-cols-1 gap-2.5 sm:grid-cols-2">${c}</div></div>`;
       if (f.rank && sel.length) {
         const cur = arr(state[f.rank.name]);
         const t = sel.map(id => {
@@ -239,7 +238,7 @@ function renderField(f) {
           return `<button type="button" data-top="${esc(f.rank.name)}" data-max="${f.rank.max}" data-value="${esc(id)}" aria-pressed="${idx > -1}" class="focus-ring inline-flex h-10 items-center gap-2 rounded-full border pl-1.5 pr-3.5 text-left text-sm sm:h-9 font-medium transition duration-150 active:scale-95 ${pill(idx > -1)}">
             <span class="grid size-6 place-items-center rounded-full text-xs font-semibold tabular-nums ${idx > -1 ? 'bg-primary-foreground/20' : 'bg-muted'}">${idx > -1 ? idx + 1 : '·'}</span>${esc(o.t)}</button>`;
         }).join('');
-        html += `<div class="mt-6 border-t pt-6"><p class="text-sm font-medium tracking-[-0.006em]">${esc(f.rank.label)}</p><p class="mt-0.5 text-[0.8125rem] text-muted-foreground">Toque na ordem de importância (até ${f.rank.max}). Toque de novo para remover.</p><div class="mt-3 flex flex-wrap gap-2">${t}</div></div>`;
+        html += `<div class="mt-6 border-t pt-4">${head(f.rank.label, false, `Toque na ordem de importância (até ${f.rank.max}). Toque de novo para remover.`)}<div class="mt-2 flex flex-wrap gap-2">${t}</div></div>`;
       }
       return html;
     }
@@ -320,7 +319,7 @@ $('back').addEventListener('click', () => { if (step > 0) { step--; save(); rend
 
 /* ============ envio ============ */
 function showDone(already) {
-  $('app').classList.add('hidden'); $('actions').classList.add('hidden'); $('hero').classList.add('hidden'); $('timeHint').classList.add('hidden');
+  $('app').classList.add('hidden'); $('actions').classList.add('hidden'); $('hero').classList.add('hidden');
   $('doneTitle').textContent = already ? 'Este link já foi respondido.' : 'Obrigado! Recebemos as suas respostas.';
   $('doneText').textContent = already ? 'Se precisar corrigir algo, fale com quem te enviou o link.' : 'Entraremos em contato em breve com uma proposta sob medida.';
   $('done').classList.remove('hidden'); $('done').classList.add('animate-swap-in');
@@ -344,7 +343,6 @@ async function finish() {
 
 /* ============ início ============ */
 document.title = 'Diagnóstico ' + form.brand;
-$('brand').textContent = form.brand;
 $('heroTitle').textContent = form.heroTitle;
 $('heroLead').textContent = form.heroLead;
 if (boot.submitted) showDone(true); else render();
