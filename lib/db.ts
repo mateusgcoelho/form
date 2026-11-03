@@ -5,12 +5,19 @@ import { formSchema } from './questions';
 import type { Answers, FormSchema } from './schema';
 
 // SQLite via libSQL: arquivo local em desenvolvimento, Turso em produção (mesmo SQL, mesmo modelo).
-const url = process.env.TURSO_DATABASE_URL ?? 'file:data/app.db';
-if (process.env.VERCEL && !process.env.TURSO_DATABASE_URL) {
-  throw new Error('Na Vercel, defina TURSO_DATABASE_URL e TURSO_AUTH_TOKEN (arquivo local não persiste).');
+// O cliente só é aberto na primeira consulta, para o build não depender de variáveis de ambiente.
+let client: Client | undefined;
+function db(): Client {
+  if (client) return client;
+  if (process.env.VERCEL && !process.env.TURSO_DATABASE_URL) {
+    throw new Error('Na Vercel, defina TURSO_DATABASE_URL e TURSO_AUTH_TOKEN (arquivo local não persiste).');
+  }
+  client = createClient({
+    url: process.env.TURSO_DATABASE_URL ?? 'file:data/app.db',
+    authToken: process.env.TURSO_AUTH_TOKEN,
+  });
+  return client;
 }
-
-const db: Client = createClient({ url, authToken: process.env.TURSO_AUTH_TOKEN });
 
 export type LinkRow = {
   token: string;
@@ -30,7 +37,7 @@ const link = (r: Row): LinkRow => ({
 });
 
 async function init() {
-  await db.executeMultiple(`
+  await db().executeMultiple(`
     CREATE TABLE IF NOT EXISTS forms (
       id         INTEGER PRIMARY KEY,
       schema     TEXT NOT NULL,
@@ -53,9 +60,9 @@ async function init() {
 
   // Grava uma nova versão do formulário quando lib/questions.ts mudou desde a última subida.
   const seed = JSON.stringify(formSchema);
-  const latest = await db.execute('SELECT schema FROM forms ORDER BY id DESC LIMIT 1');
+  const latest = await db().execute('SELECT schema FROM forms ORDER BY id DESC LIMIT 1');
   if (latest.rows[0]?.schema !== seed) {
-    await db.execute({ sql: 'INSERT INTO forms (schema, created_at) VALUES (?, ?)', args: [seed, now()] });
+    await db().execute({ sql: 'INSERT INTO forms (schema, created_at) VALUES (?, ?)', args: [seed, now()] });
   }
 }
 
@@ -65,21 +72,21 @@ const ensure = () => (ready ??= init().catch((e) => { ready = undefined; throw e
 
 export async function getForm(id: number): Promise<FormSchema> {
   await ensure();
-  const r = await db.execute({ sql: 'SELECT schema FROM forms WHERE id = ?', args: [id] });
+  const r = await db().execute({ sql: 'SELECT schema FROM forms WHERE id = ?', args: [id] });
   if (!r.rows[0]) throw new Error(`form ${id} not found`);
   return JSON.parse(String(r.rows[0].schema)) as FormSchema;
 }
 
 export async function latestFormId(): Promise<number> {
   await ensure();
-  const r = await db.execute('SELECT MAX(id) AS id FROM forms');
+  const r = await db().execute('SELECT MAX(id) AS id FROM forms');
   return Number(r.rows[0].id);
 }
 
 export async function createLink(label: string): Promise<LinkRow> {
   const token = randomBytes(12).toString('base64url');
   const row = { token, label, form_id: await latestFormId(), created_at: now(), submitted_at: null };
-  await db.execute({
+  await db().execute({
     sql: 'INSERT INTO links (token, label, form_id, created_at) VALUES (?, ?, ?, ?)',
     args: [row.token, row.label, row.form_id, row.created_at],
   });
@@ -88,19 +95,19 @@ export async function createLink(label: string): Promise<LinkRow> {
 
 export async function getLink(token: string): Promise<LinkRow | undefined> {
   await ensure();
-  const r = await db.execute({ sql: 'SELECT * FROM links WHERE token = ?', args: [token] });
+  const r = await db().execute({ sql: 'SELECT * FROM links WHERE token = ?', args: [token] });
   return r.rows[0] ? link(r.rows[0]) : undefined;
 }
 
 export async function listLinks(): Promise<LinkRow[]> {
   await ensure();
-  const r = await db.execute('SELECT * FROM links ORDER BY created_at DESC');
+  const r = await db().execute('SELECT * FROM links ORDER BY created_at DESC');
   return r.rows.map(link);
 }
 
 export async function deleteLink(token: string): Promise<boolean> {
   await ensure();
-  const [, res] = await db.batch(
+  const [, res] = await db().batch(
     [
       { sql: 'DELETE FROM responses WHERE token = ?', args: [token] },
       { sql: 'DELETE FROM links WHERE token = ?', args: [token] },
@@ -118,7 +125,7 @@ export async function saveResponse(token: string, formId: number, answers: Answe
   await ensure();
   const t = now();
   try {
-    await db.batch(
+    await db().batch(
       [
         { sql: 'INSERT INTO responses (token, answers, created_at) VALUES (?, ?, ?)', args: [token, JSON.stringify(answers), t] },
         { sql: 'UPDATE links SET submitted_at = ?, form_id = ? WHERE token = ?', args: [t, formId, token] },
@@ -134,6 +141,6 @@ export async function saveResponse(token: string, formId: number, answers: Answe
 
 export async function getAnswers(token: string): Promise<Answers | undefined> {
   await ensure();
-  const r = await db.execute({ sql: 'SELECT answers FROM responses WHERE token = ?', args: [token] });
+  const r = await db().execute({ sql: 'SELECT answers FROM responses WHERE token = ?', args: [token] });
   return r.rows[0] ? (JSON.parse(String(r.rows[0].answers)) as Answers) : undefined;
 }
